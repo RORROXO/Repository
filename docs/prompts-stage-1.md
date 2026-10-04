@@ -20,6 +20,8 @@ Bitácora de prompts del Stage 1 (sección 6.1 y Apéndice A de `refactor.pdf`).
 | 14 | claude-opus-5-5 | No puedo visualizar el diagrama que diseñaste | `docs/prompts-stage-1.md` (se generó una imagen PNG del diagrama fuera del repositorio para revisarla) |
 | 15 | claude-opus-5-5 | El diagrama quedó correcto, haz el commit. Ahora revisa cada ítem de la tabla 6.1 contra su columna "Done when" y dime si falta algo. Confirma también que docs/prompts-stage-1.md tenga todos mis prompts en orden y de forma literal. | `docs/prompts-stage-1.md` (commit del Change 16a y verificación contra la tabla 6.1) |
 | 16 | claude-opus-5-5 | Te autoizo en realizar el commit de la bitacora y haz el push. | `docs/prompts-stage-1.md` (commit de la bitácora y push a GitHub) |
+| 17 | claude-opus-5-5 | Copie y agregue el refractor.pdf en la carpeta de docs del repositorio. Sobre el prompt repetido agregalo como nota | `docs/prompts-stage-1.md` (nota del prompt repetido; `docs/refactor.pdf` lo agregó el usuario) |
+| 18 | claude-opus-5-5 | Realiza el commit y el push | `docs/prompts-stage-1.md` (commit y push de `docs/refactor.pdf` y la bitácora) |
 
 ## Notas
 
@@ -38,3 +40,11 @@ No se cambió nada más en `build.gradle`.
 ### Decisión 2: alcance del ítem 1a (header de licencia y javadoc) en el Stage 1
 
 El Change 1 dice "every Java file", pero la rúbrica 1a (sección 6.1) evalúa "every file that Stage 1 touches". En el Stage 1, el header y el javadoc se aplican solo a los archivos que toca el Stage 1, más `index.html` y `logback.xml`. Los controllers, `App.java` y los tests quedan para el Stage 2 (ítem 1b), porque ese stage igual los modifica.
+
+### Nota 3: prompt repetido entre las filas 5 y 6
+
+Después de la fila 5 se envió otra vez el mismo prompt, con el texto idéntico. Para entonces, el commit del Change 4 y el Change 3 ya estaban hechos, así que ese prompt no cambió ningún archivo. No tiene fila propia en la tabla y queda registrado en esta nota. Modelo: claude-opus-5-5. Texto literal:
+
+```text
+Revisé NotFoundException y cumple con la sección 2.5. Haz el commit. Sigue con el Change 3 (sección 2.4): crea LoanPolicy con DUE_DAYS, FEE_PER_DAY, dueDate() y constructor privado, y úsalo en MemberService.checkout y ReservationService.fulfill. Verifica que DueDateDuplicationTest pase.
+```
