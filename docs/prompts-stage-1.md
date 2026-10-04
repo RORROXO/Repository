@@ -16,6 +16,8 @@ Bitácora de prompts del Stage 1 (sección 6.1 y Apéndice A de `refactor.pdf`).
 | 10 | claude-opus-5-5 | El seed está correcto. Autorizo el commit. Continúa con el Change 13 (sección 2.14): agrega isOverdue en app.js después del helper esc y reemplaza los dos usos de l.overdue. Después de mi revisión seguimos con el Change 14. | `src/main/resources/public/app.js`, `docs/prompts-stage-1.md` |
 | 11 | claude-opus-5-5 | Lo revise, todo parece correcto. Continua con el logback.xml. | `src/main/resources/logback.xml`, `docs/prompts-stage-1.md` |
 | 12 | claude-opus-5-5 | Te aturoizo a realizar ambos commits. Luego prosigue con el Change 1a según la Decisión 2: header de licencia y javadoc completo (@param, @return, @throws) en todos los archivos que tocó el Stage 1, más index.html y logback.xml. | `src/main/java/cl/ucn/disc/arqsist/library/model/Loan.java`, `src/main/java/cl/ucn/disc/arqsist/library/model/Reservation.java`, `src/main/java/cl/ucn/disc/arqsist/library/service/MemberService.java`, `src/main/java/cl/ucn/disc/arqsist/library/service/LoanService.java`, `src/main/java/cl/ucn/disc/arqsist/library/service/ReservationService.java`, `src/main/resources/public/index.html`, `docs/prompts-stage-1.md` |
+| 13 | claude-opus-5-5 | El javadoc está completo. Autorizo el commit. Sigue con el Change 16a (sección 2.17): actualiza docs/class-diagram.puml con BaseDao, LocalDatePersister, LoanPolicy y NotFoundException, las DAOs extendiendo BaseDao, las fechas en LocalDate y sin Loan.isOverdue(). | `docs/class-diagram.puml`, `docs/prompts-stage-1.md` |
+| 14 | claude-opus-5-5 | No puedo visualizar el diagrama que diseñaste | `docs/prompts-stage-1.md` (se generó una imagen PNG del diagrama fuera del repositorio para revisarla) |
 
 ## Notas
 
