@@ -14,6 +14,7 @@ Bitácora de prompts del Stage 1 (sección 6.1 y Apéndice A de `refactor.pdf`).
 | 8 | claude-opus-5-5 | BaseDao cumple con la sección 2.6. Autorizo el commit. Sigue con el Change 6 (sección 2.7): quita throws SQLException de BookService, agrega las validaciones de borrow() y returnCopy(), y compila. | `src/main/java/cl/ucn/disc/arqsist/library/service/BookService.java`, `docs/prompts-stage-1.md` |
 | 9 | claude-opus-5-5 | El guard de inventario quedó bien. Haz el commit. Ahora el Change 10 (sección 2.11): cambia el seed a 3 miembros, 1 reserva y 3 préstamos (devuelto, activo y vencido). Decrementa availableCopies solo para el activo y el vencido, usa log.debug en cada paso y elimina createLoan. | `src/main/java/cl/ucn/disc/arqsist/library/db/Database.java`, `docs/prompts-stage-1.md` |
 | 10 | claude-opus-5-5 | El seed está correcto. Autorizo el commit. Continúa con el Change 13 (sección 2.14): agrega isOverdue en app.js después del helper esc y reemplaza los dos usos de l.overdue. Después de mi revisión seguimos con el Change 14. | `src/main/resources/public/app.js`, `docs/prompts-stage-1.md` |
+| 11 | claude-opus-5-5 | Lo revise, todo parece correcto. Continua con el logback.xml. | `src/main/resources/logback.xml`, `docs/prompts-stage-1.md` |
 
 ## Notas
 
