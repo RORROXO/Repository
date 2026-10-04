@@ -39,8 +39,8 @@ public final class MemberService {
         book.setAvailableCopies(book.getAvailableCopies() - 1);
         bookDao.update(book);
 
-        String dueDate = LoanPolicy.dueDate(LocalDate.now()).toString();
-        Loan loan = new Loan(member, book, LocalDate.now().toString(), dueDate);
+        LocalDate dueDate = LoanPolicy.dueDate(LocalDate.now());
+        Loan loan = new Loan(member, book, LocalDate.now(), dueDate);
         loanDao.create(loan);
         return loan;
     }
