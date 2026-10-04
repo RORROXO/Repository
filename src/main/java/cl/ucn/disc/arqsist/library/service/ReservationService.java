@@ -48,7 +48,7 @@ public final class ReservationService {
         reservation.setFulfilled(true);
         reservationDao.update(reservation);
 
-        String dueDate = LocalDate.now().plusDays(21).toString();
+        String dueDate = LoanPolicy.dueDate(LocalDate.now()).toString();
         Loan loan = new Loan(reservation.getMember(), reservation.getBook(), LocalDate.now().toString(), dueDate);
         loanDao.create(loan);
         return loan;
