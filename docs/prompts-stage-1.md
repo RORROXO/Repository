@@ -22,6 +22,7 @@ Bitácora de prompts del Stage 1 (sección 6.1 y Apéndice A de `refactor.pdf`).
 | 16 | claude-opus-5-5 | Te autoizo en realizar el commit de la bitacora y haz el push. | `docs/prompts-stage-1.md` (commit de la bitácora y push a GitHub) |
 | 17 | claude-opus-5-5 | Copie y agregue el refractor.pdf en la carpeta de docs del repositorio. Sobre el prompt repetido agregalo como nota | `docs/prompts-stage-1.md` (nota del prompt repetido; `docs/refactor.pdf` lo agregó el usuario) |
 | 18 | claude-opus-5-5 | Realiza el commit y el push | `docs/prompts-stage-1.md` (commit y push de `docs/refactor.pdf` y la bitácora) |
+| 19 | claude-opus-5-5 | Añade el gitignore faltante, y lo reviso para su autorización | `.gitignore`, `docs/prompts-stage-1.md` |
 
 ## Notas
 
