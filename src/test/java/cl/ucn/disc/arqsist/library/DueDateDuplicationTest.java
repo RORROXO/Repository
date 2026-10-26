@@ -9,10 +9,13 @@ import cl.ucn.disc.arqsist.library.model.Book;
 import cl.ucn.disc.arqsist.library.model.Loan;
 import cl.ucn.disc.arqsist.library.model.Member;
 import cl.ucn.disc.arqsist.library.model.Reservation;
+import cl.ucn.disc.arqsist.library.service.BookService;
 import cl.ucn.disc.arqsist.library.service.MemberService;
 import cl.ucn.disc.arqsist.library.service.ReservationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.time.Clock;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -32,9 +35,10 @@ class DueDateDuplicationTest {
         ReservationDao reservationDao = new ReservationDao(db.connectionSource());
 
         memberService = new MemberService(memberDao, bookDao, loanDao);
-        reservationService = new ReservationService(reservationDao, bookDao, memberDao, loanDao);
+        reservationService = new ReservationService(reservationDao, memberDao, loanDao, new BookService(bookDao),
+                Clock.systemDefaultZone());
 
-        book = new Book("Design Patterns", "Gamma et al.", "9780201633610", 1);
+        book = new Book("Design Patterns", "Gamma et al.", "9780201633610", 2);
         bookDao.create(book);
         member = new Member("Grace Hopper", "grace@example.com");
         memberDao.create(member);

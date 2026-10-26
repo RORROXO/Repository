@@ -4,7 +4,6 @@
 
 package cl.ucn.disc.arqsist.library.service;
 
-import cl.ucn.disc.arqsist.library.dao.BookDao;
 import cl.ucn.disc.arqsist.library.dao.LoanDao;
 import cl.ucn.disc.arqsist.library.dao.MemberDao;
 import cl.ucn.disc.arqsist.library.dao.ReservationDao;
@@ -14,8 +13,10 @@ import cl.ucn.disc.arqsist.library.model.Member;
 import cl.ucn.disc.arqsist.library.model.Reservation;
 
 import java.sql.SQLException;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * Reservation service: reserves books, lists the reservations, and turns a reservation into a loan.
@@ -28,11 +29,6 @@ public final class ReservationService {
     private final ReservationDao reservationDao;
 
     /**
-     * The DAO of the books table.
-     */
-    private final BookDao bookDao;
-
-    /**
      * The DAO of the members table.
      */
     private final MemberDao memberDao;
@@ -43,18 +39,31 @@ public final class ReservationService {
     private final LoanDao loanDao;
 
     /**
+     * The catalog service, the only owner of the copy count.
+     */
+    private final BookService bookService;
+
+    /**
+     * The clock that gives "today".
+     */
+    private final Clock clock;
+
+    /**
      * Creates the service.
      *
      * @param reservationDao the DAO of the reservations table.
-     * @param bookDao        the DAO of the books table.
      * @param memberDao      the DAO of the members table.
      * @param loanDao        the DAO of the loans table.
+     * @param bookService    the catalog service.
+     * @param clock          the clock that gives "today".
      */
-    public ReservationService(ReservationDao reservationDao, BookDao bookDao, MemberDao memberDao, LoanDao loanDao) {
+    public ReservationService(ReservationDao reservationDao, MemberDao memberDao, LoanDao loanDao,
+                              BookService bookService, Clock clock) {
         this.reservationDao = reservationDao;
-        this.bookDao = bookDao;
         this.memberDao = memberDao;
         this.loanDao = loanDao;
+        this.bookService = bookService;
+        this.clock = clock;
     }
 
     /**
@@ -63,13 +72,19 @@ public final class ReservationService {
      * @param bookId   the book id.
      * @param memberId the member id.
      * @return the new reservation.
-     * @throws SQLException declared by the original signature; the current DAOs report failures as
-     *                      RuntimeException.
+     * @throws NotFoundException if no book or no member has that id.
      */
-    public Reservation reserve(int bookId, int memberId) throws SQLException {
-        Book book = bookDao.findById(bookId);
+    public Reservation reserve(int bookId, int memberId) {
+        Book book = bookService.findById(bookId);
+        if (book == null) {
+            throw new NotFoundException("Book not found: " + bookId);
+        }
         Member member = memberDao.findById(memberId);
-        Reservation reservation = new Reservation(member, book, LocalDate.now());
+        if (member == null) {
+            throw new NotFoundException("Member not found: " + memberId);
+        }
+
+        Reservation reservation = new Reservation(member, book, LocalDate.now(clock));
         reservationDao.create(reservation);
         return reservation;
     }
@@ -78,34 +93,56 @@ public final class ReservationService {
      * Returns every reservation.
      *
      * @return the list of reservations, empty when there are none.
-     * @throws SQLException declared by the original signature; the current DAOs report failures as
-     *                      RuntimeException.
      */
-    public List<Reservation> findAll() throws SQLException {
+    public List<Reservation> findAll() {
         return reservationDao.findAll();
     }
 
     /**
-     * Turns a pending reservation into a loan. The loan is due {@link LoanPolicy#DUE_DAYS} days from today.
+     * Turns a pending reservation into a loan. The reservation update, the copy decrement, and the new loan run
+     * in one transaction.
      *
      * @param reservationId the reservation id.
-     * @return the new loan.
-     * @throws IllegalStateException if the reservation is missing or already fulfilled.
-     * @throws SQLException          declared by the original signature; the current DAOs report failures as
-     *                               RuntimeException.
+     * @return the new loan, due {@link LoanPolicy#DUE_DAYS} days from today.
+     * @throws NotFoundException     if no reservation has that id.
+     * @throws IllegalStateException if the reservation is already fulfilled, or the book has no available copies.
      */
-    public Loan fulfill(int reservationId) throws SQLException {
+    public Loan fulfill(int reservationId) {
         Reservation reservation = reservationDao.findById(reservationId);
-        if (reservation == null || reservation.isFulfilled()) {
-            throw new IllegalStateException("Reservation not available");
+        if (reservation == null) {
+            throw new NotFoundException("Reservation not found: " + reservationId);
+        }
+        if (reservation.isFulfilled()) {
+            throw new IllegalStateException("Reservation already fulfilled: " + reservationId);
         }
 
-        reservation.setFulfilled(true);
-        reservationDao.update(reservation);
+        LocalDate today = LocalDate.now(clock);
+        return inTransaction(() -> {
+            reservation.setFulfilled(true);
+            reservationDao.update(reservation);
 
-        LocalDate dueDate = LoanPolicy.dueDate(LocalDate.now());
-        Loan loan = new Loan(reservation.getMember(), reservation.getBook(), LocalDate.now(), dueDate);
-        loanDao.create(loan);
-        return loan;
+            int bookId = reservation.getBook().getId();
+            bookService.borrow(bookId);
+            Book book = bookService.findById(bookId);
+            Loan loan = new Loan(reservation.getMember(), book, today, LoanPolicy.dueDate(today));
+            loanDao.create(loan);
+            return loan;
+        });
+    }
+
+    /**
+     * Runs the given work in one database transaction. A domain error thrown by the work keeps its type.
+     *
+     * @param work the work to run.
+     * @param <R>  the type of the result.
+     * @return the result of the work.
+     * @throws RuntimeException if the database fails; it wraps the {@link SQLException}.
+     */
+    private <R> R inTransaction(Callable<R> work) {
+        try {
+            return reservationDao.transaction(work);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
