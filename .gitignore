@@ -41,3 +41,4 @@ bin/
 
 ### The database ###
 database.sqlite
+database.db
