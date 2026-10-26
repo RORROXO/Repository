@@ -25,28 +25,36 @@ skinparam package<<db>> {
   BackgroundColor #F3E5F5
   BorderColor #7B1FA2
 }
+skinparam package<<external>> {
+  BackgroundColor #ECEFF1
+  BorderColor #607D8B
+  BorderStyle dashed
+}
 hide stereotype
+hide empty members
 
 package "controller" <<controller>> {
   class BookController {
     - BookService service
-    - BookDao dao
+    + BookController(BookService)
     + register(JavalinConfig) : void
   }
 
   class LoanController {
-    - MemberService memberService
     - LoanService loanService
+    + LoanController(LoanService)
     + register(JavalinConfig) : void
   }
 
   class MemberController {
     - MemberService service
+    + MemberController(MemberService)
     + register(JavalinConfig) : void
   }
 
   class ReservationController {
     - ReservationService service
+    + ReservationController(ReservationService)
     + register(JavalinConfig) : void
   }
 }
@@ -62,31 +70,38 @@ package "service" <<service>> {
   }
 
   class LoanService {
-    + {static} int DUE_DAYS = 21
     - LoanDao loanDao
-    - BookDao bookDao
+    - MemberDao memberDao
+    - BookService bookService
+    - Clock clock
+    + LoanService(LoanDao, MemberDao, BookService, Clock)
+    + checkout(int, int) : Loan
     + findAll() : List<Loan>
     + returnLoan(int) : Loan
     + overdueLoans() : List<Loan>
+    - withAccruedFees(List<Loan>) : List<Loan>
+    - {static} accruedFee(Loan, LocalDate) : double
+    - inTransaction(Callable<R>) : R
   }
 
   class MemberService {
     - MemberDao memberDao
-    - BookDao bookDao
-    - LoanDao loanDao
+    + MemberService(MemberDao)
     + register(Member) : Member
     + findAll() : List<Member>
-    + checkout(int, int) : Loan
   }
 
   class ReservationService {
     - ReservationDao reservationDao
-    - BookDao bookDao
     - MemberDao memberDao
     - LoanDao loanDao
+    - BookService bookService
+    - Clock clock
+    + ReservationService(ReservationDao, MemberDao, LoanDao, BookService, Clock)
     + reserve(int, int) : Reservation
     + findAll() : List<Reservation>
     + fulfill(int) : Loan
+    - inTransaction(Callable<R>) : R
   }
 
   class LoanPolicy {
@@ -238,34 +253,40 @@ package "db" <<db>> {
   }
 }
 
-' ----- external types -----
-class RuntimeException <<java.lang>>
-class BaseDataType <<ORMLite>>
+' ----- external types (JDK and ORMLite, members not shown) -----
+package "external" <<external>> {
+  class RuntimeException <<java.lang>>
+  abstract class BaseDataType <<ORMLite>>
+  class Clock <<java.time>>
+}
 
 ' ----- controller -> service -----
 BookController "1" --> "1" BookService
-BookController "1" --> "1" BookDao
-LoanController "1" --> "1" MemberService
 LoanController "1" --> "1" LoanService
 MemberController "1" --> "1" MemberService
 ReservationController "1" --> "1" ReservationService
 
-' ----- service -> dao -----
+' ----- service -> service / dao -----
 BookService "1" --> "1" BookDao
 LoanService "1" --> "1" LoanDao
-LoanService "1" --> "1" BookDao
+LoanService "1" --> "1" MemberDao
+LoanService "1" --> "1" BookService : borrow() / returnCopy()
 MemberService "1" --> "1" MemberDao
-MemberService "1" --> "1" BookDao
-MemberService "1" --> "1" LoanDao
 ReservationService "1" --> "1" ReservationDao
-ReservationService "1" --> "1" BookDao
 ReservationService "1" --> "1" MemberDao
 ReservationService "1" --> "1" LoanDao
+ReservationService "1" --> "1" BookService : borrow()
+
+' ----- service -> clock -----
+LoanService "1" --> "1" Clock
+ReservationService "1" --> "1" Clock
 
 ' ----- service -> policy / errors -----
-MemberService ..> LoanPolicy : dueDate()
+LoanService ..> LoanPolicy : dueDate() / FEE_PER_DAY
 ReservationService ..> LoanPolicy : dueDate()
 BookService ..> NotFoundException : throws
+LoanService ..> NotFoundException : throws
+ReservationService ..> NotFoundException : throws
 NotFoundException --|> RuntimeException
 
 ' ----- dao hierarchy -----
