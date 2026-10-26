@@ -5,10 +5,15 @@ import cl.ucn.disc.arqsist.library.dao.LoanDao;
 import cl.ucn.disc.arqsist.library.dao.MemberDao;
 import cl.ucn.disc.arqsist.library.db.Database;
 import cl.ucn.disc.arqsist.library.model.Book;
-import cl.ucn.disc.arqsist.library.service.MemberService;
+import cl.ucn.disc.arqsist.library.service.BookService;
+import cl.ucn.disc.arqsist.library.service.LoanService;
+import cl.ucn.disc.arqsist.library.service.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -16,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class TransactionBugTest {
 
     private BookDao bookDao;
-    private MemberService memberService;
+    private LoanService loanService;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -24,7 +29,8 @@ class TransactionBugTest {
         bookDao = new BookDao(db.connectionSource());
         MemberDao memberDao = new MemberDao(db.connectionSource());
         LoanDao loanDao = new LoanDao(db.connectionSource());
-        memberService = new MemberService(memberDao, bookDao, loanDao);
+        Clock clock = Clock.fixed(Instant.parse("2026-01-15T10:00:00Z"), ZoneOffset.UTC);
+        loanService = new LoanService(loanDao, memberDao, new BookService(bookDao), clock);
     }
 
     @Test
@@ -32,7 +38,7 @@ class TransactionBugTest {
         Book book = new Book("Clean Code", "Robert C. Martin", "9780132350884", 2);
         bookDao.create(book);
 
-        assertThrows(Exception.class, () -> memberService.checkout(9999, book.getId()));
+        assertThrows(NotFoundException.class, () -> loanService.checkout(9999, book.getId()));
 
         Book reloaded = bookDao.findById(book.getId());
         assertEquals(reloaded.getTotalCopies(), reloaded.getAvailableCopies(),

@@ -10,18 +10,20 @@ import cl.ucn.disc.arqsist.library.model.Loan;
 import cl.ucn.disc.arqsist.library.model.Member;
 import cl.ucn.disc.arqsist.library.model.Reservation;
 import cl.ucn.disc.arqsist.library.service.BookService;
-import cl.ucn.disc.arqsist.library.service.MemberService;
+import cl.ucn.disc.arqsist.library.service.LoanService;
 import cl.ucn.disc.arqsist.library.service.ReservationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DueDateDuplicationTest {
 
-    private MemberService memberService;
+    private LoanService loanService;
     private ReservationService reservationService;
     private Book book;
     private Member member;
@@ -34,9 +36,10 @@ class DueDateDuplicationTest {
         LoanDao loanDao = new LoanDao(db.connectionSource());
         ReservationDao reservationDao = new ReservationDao(db.connectionSource());
 
-        memberService = new MemberService(memberDao, bookDao, loanDao);
-        reservationService = new ReservationService(reservationDao, memberDao, loanDao, new BookService(bookDao),
-                Clock.systemDefaultZone());
+        Clock clock = Clock.fixed(Instant.parse("2026-01-15T10:00:00Z"), ZoneOffset.UTC);
+        BookService bookService = new BookService(bookDao);
+        loanService = new LoanService(loanDao, memberDao, bookService, clock);
+        reservationService = new ReservationService(reservationDao, memberDao, loanDao, bookService, clock);
 
         book = new Book("Design Patterns", "Gamma et al.", "9780201633610", 2);
         bookDao.create(book);
@@ -46,7 +49,7 @@ class DueDateDuplicationTest {
 
     @Test
     void checkoutAndFulfillUseTheSameLoanPeriod() throws Exception {
-        Loan fromCheckout = memberService.checkout(member.getId(), book.getId());
+        Loan fromCheckout = loanService.checkout(member.getId(), book.getId());
 
         Reservation reservation = reservationService.reserve(book.getId(), member.getId());
         Loan fromFulfill = reservationService.fulfill(reservation.getId());

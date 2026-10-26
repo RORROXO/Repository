@@ -31,7 +31,7 @@ public final class App {
         ReservationDao reservationDao = new ReservationDao(db.connectionSource());
 
         BookService bookService = new BookService(bookDao);
-        MemberService memberService = new MemberService(memberDao, bookDao, loanDao);
+        MemberService memberService = new MemberService(memberDao);
         Clock clock = Clock.system(ZoneId.of("America/Santiago"));
         LoanService loanService = new LoanService(loanDao, memberDao, bookService, clock);
         ReservationService reservationService = new ReservationService(reservationDao, memberDao, loanDao, bookService, clock);
