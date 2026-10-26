@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2026. Arquitectura de Sistemas, DISC, UCN, Antofagasta.
+ */
+
 package cl.ucn.disc.arqsist.library;
 
 import cl.ucn.disc.arqsist.library.controller.BookController;
@@ -25,10 +29,29 @@ import java.time.Clock;
 import java.time.ZoneId;
 import java.util.Map;
 
+/**
+ * Entry point of the application: opens the database, wires the DAOs, the services, and the controllers, and
+ * starts the web server.
+ */
 public final class App {
 
+    /**
+     * The logger of the startup steps.
+     */
     private static final Logger log = LoggerFactory.getLogger(App.class);
 
+    /**
+     * Utility class: no instances.
+     */
+    private App() {
+    }
+
+    /**
+     * Starts the application on port 7070.
+     *
+     * @param args the command line arguments, not used.
+     * @throws Exception if the database cannot be opened or seeded.
+     */
     public static void main(String[] args) throws Exception {
         log.info("Opening the database");
         Database db = new Database("jdbc:sqlite:database.db");

@@ -1,17 +1,37 @@
+/*
+ * Copyright (c) 2026. Arquitectura de Sistemas, DISC, UCN, Antofagasta.
+ */
+
 package cl.ucn.disc.arqsist.library.controller;
 
 import cl.ucn.disc.arqsist.library.model.Book;
 import cl.ucn.disc.arqsist.library.service.BookService;
 import io.javalin.config.JavalinConfig;
 
+/**
+ * HTTP routes of the catalog: /books.
+ */
 public final class BookController {
 
+    /**
+     * The catalog service.
+     */
     private final BookService service;
 
+    /**
+     * Creates the controller.
+     *
+     * @param service the catalog service.
+     */
     public BookController(BookService service) {
         this.service = service;
     }
 
+    /**
+     * Registers the routes: GET /books, GET /books/{id}, and POST /books.
+     *
+     * @param config the Javalin configuration that receives the routes.
+     */
     public void register(JavalinConfig config) {
         config.routes.get("/books", ctx -> ctx.json(service.listAll()));
         config.routes.get("/books/{id}", ctx -> ctx.json(service.findById(Integer.parseInt(ctx.pathParam("id")))));

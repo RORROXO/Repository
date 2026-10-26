@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2026. Arquitectura de Sistemas, DISC, UCN, Antofagasta.
+ */
+
 package cl.ucn.disc.arqsist.library;
 
 import cl.ucn.disc.arqsist.library.dao.BookDao;
@@ -21,13 +25,36 @@ import java.time.ZoneOffset;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * Detects Error #5: checkout and fulfill must create loans with the same due date.
+ */
 class DueDateDuplicationTest {
 
+    /**
+     * The loan service under test.
+     */
     private LoanService loanService;
+
+    /**
+     * The reservation service under test.
+     */
     private ReservationService reservationService;
+
+    /**
+     * The test book, with two copies.
+     */
     private Book book;
+
+    /**
+     * The test member.
+     */
     private Member member;
 
+    /**
+     * Creates an in-memory database, the two services with a fixed clock, a book, and a member.
+     *
+     * @throws Exception if the database cannot be created.
+     */
     @BeforeEach
     void setUp() throws Exception {
         Database db = new Database("jdbc:sqlite::memory:");
@@ -47,6 +74,11 @@ class DueDateDuplicationTest {
         memberDao.create(member);
     }
 
+    /**
+     * A checkout and a fulfilled reservation on the same day get the same due date.
+     *
+     * @throws Exception if a service call fails.
+     */
     @Test
     void checkoutAndFulfillUseTheSameLoanPeriod() throws Exception {
         Loan fromCheckout = loanService.checkout(member.getId(), book.getId());

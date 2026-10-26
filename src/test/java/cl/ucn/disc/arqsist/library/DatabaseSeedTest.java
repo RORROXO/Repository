@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2026. Arquitectura de Sistemas, DISC, UCN, Antofagasta.
+ */
+
 package cl.ucn.disc.arqsist.library;
 
 import cl.ucn.disc.arqsist.library.dao.BookDao;
@@ -16,13 +20,37 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * Detects Errors #7 and #8 in the seed: every open loan must take a copy out of stock, and a second seed must
+ * change nothing.
+ */
 class DatabaseSeedTest {
 
+    /**
+     * The in-memory database under test.
+     */
     private Database db;
+
+    /**
+     * The DAO of the books table.
+     */
     private BookDao bookDao;
+
+    /**
+     * The DAO of the loans table.
+     */
     private LoanDao loanDao;
+
+    /**
+     * The DAO of the reservations table.
+     */
     private ReservationDao reservationDao;
 
+    /**
+     * Creates an empty in-memory database and the DAOs.
+     *
+     * @throws Exception if the database cannot be created.
+     */
     @BeforeEach
     void setUp() throws Exception {
         db = new Database("jdbc:sqlite::memory:");
@@ -31,6 +59,12 @@ class DatabaseSeedTest {
         reservationDao = new ReservationDao(db.connectionSource());
     }
 
+    /**
+     * The seed creates loans and reservations, exactly one overdue loan, and one copy out of stock for every
+     * book with an open loan.
+     *
+     * @throws Exception if the seed fails.
+     */
     @Test
     void seedCreatesConsistentLoansAndReservations() throws Exception {
         db.seedIfEmpty();
@@ -54,6 +88,11 @@ class DatabaseSeedTest {
         }
     }
 
+    /**
+     * A second seed keeps the number of loans and reservations.
+     *
+     * @throws Exception if the seed fails.
+     */
     @Test
     void secondSeedChangesNothing() throws Exception {
         db.seedIfEmpty();

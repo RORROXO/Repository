@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2026. Arquitectura de Sistemas, DISC, UCN, Antofagasta.
+ */
+
 package cl.ucn.disc.arqsist.library;
 
 import cl.ucn.disc.arqsist.library.dao.BookDao;
@@ -18,11 +22,26 @@ import java.time.ZoneOffset;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+/**
+ * Detects Errors #3 and #9: a failed checkout must not leave a partial copy decrement.
+ */
 class TransactionBugTest {
 
+    /**
+     * The DAO of the books table, used to reload the book.
+     */
     private BookDao bookDao;
+
+    /**
+     * The loan service under test.
+     */
     private LoanService loanService;
 
+    /**
+     * Creates an in-memory database and the loan service with a fixed clock.
+     *
+     * @throws Exception if the database cannot be created.
+     */
     @BeforeEach
     void setUp() throws Exception {
         Database db = new Database("jdbc:sqlite::memory:");
@@ -33,6 +52,11 @@ class TransactionBugTest {
         loanService = new LoanService(loanDao, memberDao, new BookService(bookDao), clock);
     }
 
+    /**
+     * A checkout with a missing member throws NotFoundException and keeps every copy available.
+     *
+     * @throws Exception if the book cannot be created or reloaded.
+     */
     @Test
     void checkoutLeavesNoPartialStateOnFailure() throws Exception {
         Book book = new Book("Clean Code", "Robert C. Martin", "9780132350884", 2);
