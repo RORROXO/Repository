@@ -16,6 +16,9 @@ import cl.ucn.disc.arqsist.library.service.ReservationService;
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
 
+import java.time.Clock;
+import java.time.ZoneId;
+
 public final class App {
 
     public static void main(String[] args) throws Exception {
@@ -29,7 +32,8 @@ public final class App {
 
         BookService bookService = new BookService(bookDao);
         MemberService memberService = new MemberService(memberDao, bookDao, loanDao);
-        LoanService loanService = new LoanService(loanDao, bookDao);
+        Clock clock = Clock.system(ZoneId.of("America/Santiago"));
+        LoanService loanService = new LoanService(loanDao, memberDao, bookService, clock);
         ReservationService reservationService = new ReservationService(reservationDao, bookDao, memberDao, loanDao);
 
         BookController bookController = new BookController(bookService, bookDao);
