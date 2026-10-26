@@ -36,9 +36,9 @@ public final class App {
         LoanService loanService = new LoanService(loanDao, memberDao, bookService, clock);
         ReservationService reservationService = new ReservationService(reservationDao, memberDao, loanDao, bookService, clock);
 
-        BookController bookController = new BookController(bookService, bookDao);
+        BookController bookController = new BookController(bookService);
         MemberController memberController = new MemberController(memberService);
-        LoanController loanController = new LoanController(memberService, loanService);
+        LoanController loanController = new LoanController(loanService);
         ReservationController reservationController = new ReservationController(reservationService);
 
         Javalin.create(config -> {
