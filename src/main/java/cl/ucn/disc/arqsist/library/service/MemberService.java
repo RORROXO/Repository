@@ -62,4 +62,19 @@ public final class MemberService {
         return member;
     }
 
+    /**
+     * Finds members by a literal name fragment.
+     *
+     * @param query the name fragment
+     * @return the matching members in ascending ID order
+     * @throws IllegalArgumentException if the trimmed query is empty
+     */
+    public List<Member> search(String query) {
+        String trimmedQuery = query.trim();
+        if (trimmedQuery.isEmpty()) {
+            throw new IllegalArgumentException("Search query must not be blank");
+        }
+        return memberDao.searchByName(trimmedQuery);
+    }
+
 }
